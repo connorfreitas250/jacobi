@@ -14,9 +14,9 @@ struct worker_st {
   bool* finished;
   int* arrived;
   float maxdiff;
-  float*** grid_ptr;
-  float*** newgrid_ptr;
-  sem_t** barrier;
+  float** grid_ptr;
+  float** newgrid_ptr;
+  sem_t* barrier;
   pthread_mutex_t* mutex; 
 } worker_t;
 
