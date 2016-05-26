@@ -13,6 +13,7 @@ struct worker_st {
   int thread_id;
   bool* finished;
   int* arrived;
+  int* finarr;
   float maxdiff;
   float** grid_ptr;
   float** newgrid_ptr;
