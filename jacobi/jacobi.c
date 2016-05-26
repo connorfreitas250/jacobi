@@ -11,7 +11,7 @@
 
 #define NUM_THREADS 8
 #define EPSILON 0.0001
-#define N 2048
+#define N 64
 
 #include <stdio.h>
 #include <stdlib.h>
