@@ -11,12 +11,12 @@ struct worker_st {
   int startrow;
   int endrow;
   int thread_id;
+  double maxdiff;
   bool* finished;
   int* arrived;
   int* finarr;
-  float maxdiff;
-  float** grid_ptr;
-  float** newgrid_ptr;
+  double** grid_ptr;
+  double** newgrid_ptr;
   sem_t* barrier;
   pthread_mutex_t* mutex; 
 } worker_t;

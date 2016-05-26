@@ -9,9 +9,9 @@
  *
  */
 
-#define NUM_THREADS 8
+#define NUM_THREADS 4
 #define EPSILON 0.0001
-#define N 64
+#define N 2048
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,28 +27,27 @@ void worker_init(worker_t* worker, int thread_number, int num_threads,
                  void* barrier_ptr, int* arrived_ptr, int* finarr_ptr);
 void * work (void* thread_args); 
 void barrier_wait (worker_t* worker_args);
-void read_floats (char* file_name, void* init_matrix);
+void read_doubles (char* file_name, void* init_matrix);
 
 
-void main(int argc, char* argv[]) {
-  float** grid;
-  float** newgrid;
+int main(int argc, char* argv[]) {
+  double** grid;
+  double** newgrid;
   void* retval;
   bool finished = false;
-  int finarr[NUM_THREADS];
+  int finarr[NUM_THREADS] = {0};
   int arrived = 0;
   pthread_mutex_t mutex;
   pthread_mutex_init(&mutex, NULL);
   sem_t barrier[NUM_THREADS];
-  
-  grid = malloc(N * sizeof(float*));
-  newgrid = malloc(N * sizeof(float*));
+  grid = malloc(N * sizeof(double*));
+  newgrid = malloc(N * sizeof(double*));
   for (int i = 0; i <= N; ++i) {
-    grid[i] = malloc(N * sizeof(float*));
-    newgrid[i] = malloc(N * sizeof(float*));
+    grid[i] = malloc(N * sizeof(double));
+    newgrid[i] = malloc(N * sizeof(double));
   }
 
-  read_floats(argv[1], grid);
+  read_doubles(argv[1], grid);
   
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -73,9 +72,14 @@ void main(int argc, char* argv[]) {
   for (int i = 0; i < NUM_THREADS; ++i) {
     pthread_join(thds[i], &retval);
   }
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < N; ++j) {
+      printf("%.10lf ", grid[i][j]);
+    }
+  }
   free(grid);
   free(newgrid);
-  printf("Done!\n");
+  //printf("Done!\n");
 }
 
 void worker_init(worker_t* worker, int thread_number, int num_threads,
@@ -83,10 +87,10 @@ void worker_init(worker_t* worker, int thread_number, int num_threads,
                  pthread_mutex_t* mutex_ptr, bool* finished_ptr,
                  void* barrier_ptr, int* arrived_ptr, int* finarr_ptr) {
   worker->startrow = (N * thread_number) / num_threads;
-  worker->endrow = (N * (thread_number + 1)) / num_threads - 1;
+  worker->endrow = ((N * (thread_number + 1)) / num_threads) - 1;
   worker->thread_id = thread_number;
-  worker->grid_ptr = (float **) grid_init_ptr;
-  worker->newgrid_ptr = (float **) newgrid_init_ptr;
+  worker->grid_ptr = (double **) grid_init_ptr;
+  worker->newgrid_ptr = (double **) newgrid_init_ptr;
   worker->mutex = mutex_ptr;
   worker->finished = finished_ptr;  
   worker->barrier = (sem_t*) barrier_ptr;
@@ -97,35 +101,41 @@ void worker_init(worker_t* worker, int thread_number, int num_threads,
     worker->startrow = 1;
   }
 
-  if (worker->endrow == N) {
-    worker->endrow = N - 1;
+  if (worker->endrow == N - 1) {
+    worker->endrow = N - 2;
   }
 } 
 
 void * work (void* thread_args) {
   worker_t* worker_args = (worker_t*)thread_args; 
+  double maxdiff;
+  double newvalue;
+  double oldvalue;
+  double** tempgrid;
+  
   while (!*(worker_args->finished)) {
-    worker_args->maxdiff = 0.0;
+    maxdiff = 0.0;
     
-    for (int i = worker_args->startrow; i < worker_args->endrow; ++i) {
-      for (int j = 1; j < N - 1; ++j) {
-        worker_args->newgrid_ptr[i][j] = (worker_args->grid_ptr[i - 1][j] + 
-        worker_args->grid_ptr[i][j - 1] +
-        worker_args->grid_ptr[i + 1][j] +
-        worker_args->grid_ptr[i][j + 1]) * 0.25;
+    for (int i = worker_args->startrow; i <= worker_args->endrow; ++i) {
+      for (int j = 1; j <= N - 2; ++j) {
+        oldvalue = worker_args->grid_ptr[i][j];
+        newvalue = (worker_args->grid_ptr[i - 1][j] + 
+                    worker_args->grid_ptr[i][j - 1] +
+                    worker_args->grid_ptr[i + 1][j] +
+                    worker_args->grid_ptr[i][j + 1]) * 0.25;
         
-        if ((worker_args->newgrid_ptr[i][j] - worker_args->grid_ptr[i][j]) > 
-          worker_args->maxdiff) {
-          worker_args->maxdiff = worker_args->newgrid_ptr[i][j] - worker_args->grid_ptr[i][j];
+        worker_args->newgrid_ptr[i][j] = newvalue;
+        
+        if ((newvalue - oldvalue) > maxdiff) {
+          maxdiff = newvalue - oldvalue;
         }
       }
     }
 
-    barrier_wait(worker_args);
-    float** tempgrid = worker_args->newgrid_ptr;
+    tempgrid = worker_args->newgrid_ptr;
     worker_args->newgrid_ptr = worker_args->grid_ptr;
     worker_args->grid_ptr = tempgrid;
-    if (worker_args->maxdiff < EPSILON) {
+    if (maxdiff < EPSILON) {
       worker_args->finarr[worker_args->thread_id] = 1;
     }      
     else {
@@ -161,14 +171,14 @@ void barrier_wait (worker_t* worker_args) {
 }     
  
 
-void read_floats (char* file_name, void* init_matrix) {
+void read_doubles (char* file_name, void* init_matrix) {
   FILE* file = fopen(file_name, "r");
-  float f = 0.0;
-  float** matrix = (float **) init_matrix;
+  double f = 0.0;
+  double** matrix = (double **) init_matrix;
 
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
-      fscanf(file, "%f", &f);
+      fscanf(file, "%lf", &f);
       matrix[i][j] = f;
 
     }
