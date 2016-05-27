@@ -1,5 +1,5 @@
 C = gcc
-CFLAGS = -g -Wall -pthread -O3
+CFLAGS = -g -Wall -pthread
 DEPS = jacobi.h
 FILES = jacobi.o
 

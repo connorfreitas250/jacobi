@@ -9,9 +9,9 @@
  *
  */
 
-#define NUM_THREADS 4
+#define NUM_THREADS 1
 #define EPSILON 0.0001
-#define N 2048
+#define N 2048 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,12 +74,11 @@ int main(int argc, char* argv[]) {
   }
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
-      printf("%.10lf ", grid[i][j]);
+      //printf("%.10lf ", grid[i][j]);
     }
   }
   free(grid);
-  free(newgrid);
-  //printf("Done!\n");
+  free(newgrid); 
 }
 
 void worker_init(worker_t* worker, int thread_number, int num_threads,
@@ -112,16 +111,19 @@ void * work (void* thread_args) {
   double newvalue;
   double oldvalue;
   double** tempgrid;
-  
+  int startrow = worker_args->startrow;
+  int endrow = worker_args->endrow;  
+  int iterations = 0;
+
   while (!*(worker_args->finished)) {
     maxdiff = 0.0;
     
-    for (int i = worker_args->startrow; i <= worker_args->endrow; ++i) {
+    for (int i = startrow; i <= endrow; ++i) {
       for (int j = 1; j <= N - 2; ++j) {
         oldvalue = worker_args->grid_ptr[i][j];
         newvalue = (worker_args->grid_ptr[i - 1][j] + 
-                    worker_args->grid_ptr[i][j - 1] +
                     worker_args->grid_ptr[i + 1][j] +
+                    worker_args->grid_ptr[i][j - 1] +
                     worker_args->grid_ptr[i][j + 1]) * 0.25;
         
         worker_args->newgrid_ptr[i][j] = newvalue;
@@ -131,7 +133,8 @@ void * work (void* thread_args) {
         }
       }
     }
-
+    ++iterations;
+    printf("%lf maxdiff.\n", maxdiff);
     tempgrid = worker_args->newgrid_ptr;
     worker_args->newgrid_ptr = worker_args->grid_ptr;
     worker_args->grid_ptr = tempgrid;
@@ -143,6 +146,7 @@ void * work (void* thread_args) {
     }
     barrier_wait(worker_args);
   }
+  printf("%d iterations.\n", iterations); 
   pthread_exit(NULL);
 }
 
