@@ -1,0 +1,96 @@
+Run 1: Local Machine 
+
+1 thread
+  System time (seconds): 0.26
+  Percent of CPU this job got: 99%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.73
+        
+2 threads 
+  System time (seconds): 0.36
+  Percent of CPU this job got: 194%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 2:37.13
+        
+3 threads
+  System time (seconds): 0.39
+  Percent of CPU this job got: 284%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:50.92
+
+4 threads 
+  System time (seconds): 0.48
+  Percent of CPU this job got: 357%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:35.97
+
+5 threads
+  System time (seconds): 0.58
+  Percent of CPU this job got: 369%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 2:02.82
+        
+6 threads
+  System time (seconds): 0.60
+  Percent of CPU this job got: 505%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:44.42
+        
+7 threads
+  System time (seconds): 0.66
+  Percent of CPU this job got: 611%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:32.17
+
+8 threads
+  System time (seconds): 0.58
+  Percent of CPU this job got: 749%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:25.23
+        
+9 threads
+  System time (seconds): 1.28
+  Percent of CPU this job got: 552%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:45.28
+
+10 threads
+  System time (seconds): 1.22
+  Percent of CPU this job got: 557%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:40.74
+        
+11 threads
+  System time (seconds): 1.36
+  Percent of CPU this job got: 566%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:37.41
+        
+12 threads
+  System time (seconds): 1.33
+  Percent of CPU this job got: 572%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:35.66
+        
+14 threads
+  System time (seconds): 1.57
+  Percent of CPU this job got: 617%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:32.07
+        
+16 threads
+  System time (seconds): 1.75
+  Percent of CPU this job got: 703%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:25.52
+
+18 threads
+  System time (seconds): 2.16
+  Percent of CPU this job got: 618%
+  Elapsed (wall clock) time (h:mm:ss or m:ss): 1:33.84
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

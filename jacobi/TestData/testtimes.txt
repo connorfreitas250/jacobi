@@ -1,0 +1,30 @@
+Run 1: Local Machine 
+
+4 threads 
+User time (seconds): 
+        System time (seconds): 0.48
+        Percent of CPU this job got: 357%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:35.97
+
+
+3 threads
+User time (seconds): 
+        System time (seconds): 0.39
+        Percent of CPU this job got: 284%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:50.92
+
+
+2 threads 
+User time (seconds): 
+        System time (seconds): 0.36
+        Percent of CPU this job got: 194%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 2:37.13
+
+        
+1 thread
+User time (seconds): 
+        System time (seconds): 0.26
+        Percent of CPU this job got: 99%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.73
+
+      

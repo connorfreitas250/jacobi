@@ -9,7 +9,6 @@
  *
  */
 
-#define NUM_THREADS 1
 #define EPSILON 0.0001
 #define N 2048 
 
@@ -29,19 +28,27 @@ void * work (void* thread_args);
 void barrier_wait (worker_t* worker_args);
 void read_doubles (char* file_name, void* init_matrix);
 
+int NUM_THREADS = 1;
 
 int main(int argc, char* argv[]) {
+
+  if (argc == 3) {
+    NUM_THREADS = atoi(argv[2]);
+  }
+  
   double** grid;
   double** newgrid;
   void* retval;
   bool finished = false;
-  int finarr[NUM_THREADS] = {0};
+  int finarr[NUM_THREADS];
   int arrived = 0;
   pthread_mutex_t mutex;
   pthread_mutex_init(&mutex, NULL);
   sem_t barrier[NUM_THREADS];
+  
   grid = malloc(N * sizeof(double*));
   newgrid = malloc(N * sizeof(double*));
+  
   for (int i = 0; i <= N; ++i) {
     grid[i] = malloc(N * sizeof(double));
     newgrid[i] = malloc(N * sizeof(double));
@@ -72,11 +79,13 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < NUM_THREADS; ++i) {
     pthread_join(thds[i], &retval);
   }
+  
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
-      //printf("%.10lf ", grid[i][j]);
+      printf("%.10lf ", grid[i][j]);
     }
   }
+  
   free(grid);
   free(newgrid); 
 }
@@ -113,7 +122,6 @@ void * work (void* thread_args) {
   double** tempgrid;
   int startrow = worker_args->startrow;
   int endrow = worker_args->endrow;  
-  int iterations = 0;
 
   while (!*(worker_args->finished)) {
     maxdiff = 0.0;
@@ -128,13 +136,11 @@ void * work (void* thread_args) {
         
         worker_args->newgrid_ptr[i][j] = newvalue;
         
-        if ((newvalue - oldvalue) > maxdiff) {
+        if ((newvalue - oldvalue) >= maxdiff) {
           maxdiff = newvalue - oldvalue;
         }
       }
     }
-    ++iterations;
-    printf("%lf maxdiff.\n", maxdiff);
     tempgrid = worker_args->newgrid_ptr;
     worker_args->newgrid_ptr = worker_args->grid_ptr;
     worker_args->grid_ptr = tempgrid;
@@ -146,7 +152,6 @@ void * work (void* thread_args) {
     }
     barrier_wait(worker_args);
   }
-  printf("%d iterations.\n", iterations); 
   pthread_exit(NULL);
 }
 

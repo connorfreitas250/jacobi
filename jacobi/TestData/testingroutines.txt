@@ -1,0 +1,6 @@
+Testing Routine:
+make
+/usr/bin/time -v ./jacobi input.mtx <number of threads?> <print?>
+
+
+The command in bash 
