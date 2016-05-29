@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#THREADS=1
+#ile [ $THREADS -lt 9 ]; do
+#    for i in {1..5}; do
+#	echo -n $THREADS >> clockRunTimes_withThreadCount
+#	echo -n " " >> clockRunTimes_withThreadCount
+#	/usr/bin/time -f %E -a -o clockRunTimes_withThreadCount ./jacobi input.mtx $THREADS
+#	echo $THREADS
+ #   done
+  #  let THREADS=THREADS+1
+#done
+
+
+for j in 3 4; do
+    for i in {1..5}; do
+	echo -n $j >> clockRunTimes_withThreadCount
+	echo -n " " >> clockRunTimes_withThreadCount
+	/usr/bin/time -f %E -a -o clockRunTimes_withThreadCount3and4redo ./jacobi input.mtx $j
+	echo $j
+    done
+done
