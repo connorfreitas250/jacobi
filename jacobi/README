@@ -2,3 +2,13 @@ Jacobi Project for CS322
 
 Connor Freitas
 Theo Floor
+
+jacobi takes up to 5 command line arguments as follows:
+
+	 ./jacobi N M inputfile [number of threads] [print output option]
+
+N: int - height of matrix
+M: int - width of matrix
+inputfile: char* - starting NxM matrix for Jacobi iteration
+number of threads: int - taken to be an integer between 1 and N-2
+print output option: char* - if "y", jacobi will print the newly calculated matrix to stdout; if not, jacobi will return silently

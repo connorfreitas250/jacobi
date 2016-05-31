@@ -10,7 +10,6 @@
  */
 
 #define EPSILON 0.0001
-#define N 2048 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,35 +28,59 @@ void barrier_wait (worker_t* worker_args);
 void read_doubles (char* file_name, void* init_matrix);
 
 int NUM_THREADS = 1;
+int N = 0;
+int M = 0;
 
 int main(int argc, char* argv[]) {
 
-  if (argc == 3) {
-    NUM_THREADS = atoi(argv[2]);
-  }
-  
   double** grid;
   double** newgrid;
   void* retval;
   bool finished = false;
-  int finarr[NUM_THREADS];
+  bool printResults = false;
   int arrived = 0;
   pthread_mutex_t mutex;
   pthread_mutex_init(&mutex, NULL);
+
+  if (argc < 4) {
+    fprintf (stderr, "Error: not enough arguments\n");
+    return 0;
+  }
+
+  N = atoi (argv[1]);
+  M = atoi (argv[2]);
+  
+  if (argc > 4) {
+    if (strcmp (argv[4], "y") == 0) {
+      printResults = true;
+    } else {
+      NUM_THREADS = atoi(argv[4]);
+      if (NUM_THREADS < 1)
+	NUM_THREADS = 1;
+      else if (NUM_THREADS > N - 2)
+	NUM_THREADS = N - 2;
+      if (argc > 5) {
+	if (strcmp (argv[5], "y") == 0)
+	  printResults = true;
+      }
+    }
+  }
+
+  int finarr[NUM_THREADS];
   sem_t barrier[NUM_THREADS];
   
   grid = malloc(N * sizeof(double*));
   newgrid = malloc(N * sizeof(double*));
   
-  for (int i = 0; i <= N; ++i) {
-    grid[i] = malloc(N * sizeof(double));
-    newgrid[i] = malloc(N * sizeof(double));
+  for (int i = 0; i < M; ++i) {
+    grid[i] = malloc(M * sizeof(double));
+    newgrid[i] = malloc(M * sizeof(double));
   }
 
-  read_doubles(argv[1], grid);
+  read_doubles(argv[3], grid);
   
   for (int i = 0; i < N; ++i) {
-    for (int j = 0; j < N; ++j) {
+    for (int j = 0; j < M; ++j) {
       newgrid[i][j] = grid[i][j];
     }
   }
@@ -71,7 +94,6 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < NUM_THREADS; ++i) {
     worker_init(&worker[i], i, NUM_THREADS, grid, newgrid, 
                 &mutex, &finished, barrier, &arrived, finarr);
-    
     if (pthread_create(&thds[i], NULL, work, &worker[i])) {
       printf("error\n");
     }
@@ -79,12 +101,14 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < NUM_THREADS; ++i) {
     pthread_join(thds[i], &retval);
   }
-  
-  //for (int i = 0; i < N; ++i) {
-  //  for (int j = 0; j < N; ++j) {
-  //    printf("%.10lf ", grid[i][j]);
-  //  }
-  //}
+
+  if (printResults) {
+    for (int i = 0; i < N; ++i) {
+      for (int j = 0; j < M; ++j) {
+	printf("%.10lf ", grid[i][j]);
+      }
+    }
+  }
   
   free(grid);
   free(newgrid); 
@@ -94,8 +118,8 @@ void worker_init(worker_t* worker, int thread_number, int num_threads,
                  void* grid_init_ptr, void* newgrid_init_ptr, 
                  pthread_mutex_t* mutex_ptr, bool* finished_ptr,
                  void* barrier_ptr, int* arrived_ptr, int* finarr_ptr) {
-  worker->startrow = (N * thread_number) / num_threads;
-  worker->endrow = ((N * (thread_number + 1)) / num_threads) - 1;
+  worker->startrow = (((N - 2) * thread_number) / num_threads) + 1;
+  worker->endrow = (((N - 2) * (thread_number + 1)) / num_threads);
   worker->thread_id = thread_number;
   worker->grid_ptr = (double **) grid_init_ptr;
   worker->newgrid_ptr = (double **) newgrid_init_ptr;
@@ -104,14 +128,7 @@ void worker_init(worker_t* worker, int thread_number, int num_threads,
   worker->barrier = (sem_t*) barrier_ptr;
   worker->arrived = arrived_ptr; 
   worker->finarr = finarr_ptr;
- 
-  if (worker->startrow == 0) {
-    worker->startrow = 1;
-  }
 
-  if (worker->endrow == N - 1) {
-    worker->endrow = N - 2;
-  }
 } 
 
 void * work (void* thread_args) {
@@ -121,13 +138,13 @@ void * work (void* thread_args) {
   double oldvalue;
   double** tempgrid;
   int startrow = worker_args->startrow;
-  int endrow = worker_args->endrow;  
+  int endrow = worker_args->endrow;
 
   while (!*(worker_args->finished)) {
     maxdiff = 0.0;
     
     for (int i = startrow; i <= endrow; ++i) {
-      for (int j = 1; j <= N - 2; ++j) {
+      for (int j = 1; j <= M - 2; ++j) {
         oldvalue = worker_args->grid_ptr[i][j];
         newvalue = (worker_args->grid_ptr[i - 1][j] + 
                     worker_args->grid_ptr[i + 1][j] +
@@ -186,7 +203,7 @@ void read_doubles (char* file_name, void* init_matrix) {
   double** matrix = (double **) init_matrix;
 
   for (int i = 0; i < N; ++i) {
-    for (int j = 0; j < N; ++j) {
+    for (int j = 0; j < M; ++j) {
       fscanf(file, "%lf", &f);
       matrix[i][j] = f;
 
