@@ -12,3 +12,7 @@ M: int - width of matrix
 inputfile: char* - starting NxM matrix for Jacobi iteration
 number of threads: int - taken to be an integer between 1 and N-2
 print output option: char* - if "y", jacobi will print the newly calculated matrix to stdout; if not, jacobi will return silently
+
+Example: ./jacobi 2048 2048 input.mtx 8 y
+
+The above command will print the results of an 8-threaded run of jacobi, given a 2048x2048 matrix called "input.mtx".
